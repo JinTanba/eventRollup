@@ -64,10 +64,11 @@ contract EventErc721 is ERC721URIStorage, Ownable, IClient {
     }
 
     //onchain
+    //TODO: function proof(bool isValid, address sender, uint256 toBlocknumber) external override returns(bool)
     function proof(bool isValid, address sender) external override returns(bool) {
         require(msg.sender == rollupContract, 'only rollup operator');
         isStateValid = isValid;
-        return sender == address(0);
+        return true;
     }
 
     function applyVerifiedState(MintRequest[] memory verifiedRequests) external onlyrollupContract {
