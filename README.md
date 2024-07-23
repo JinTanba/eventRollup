@@ -1,13 +1,12 @@
 # LayerN + 1, Event&Oracle rollup
+1. Event-based state changes
+2. Off-chain processing and on-chain verification
+3. Ensuring reliability using Chainlink Functions
+4. Efficient verification (proof) mechanism
 
-1. イベントベースの状態変更
-2. オフチェーン処理とオンチェーン検証
-3. Chainlink Functionsを利用した信頼性の確保
-4. 効率的な検証（proof）メカニズム
-
-## 主要コンポーネント
-### 1. IClientインターフェース
-このインターフェースは、システムと統合するコントラクトの標準を定義します。これに準拠することで、開発者は簡単に、この仕組みを自身のプロジェクトに導入できます。
+## Key Components
+### 1. IClient Interface
+This interface defines the standard for contracts integrating with the system. By adhering to this, developers can easily incorporate this mechanism into their own projects.
 ```solidity
 interface IClient {
     struct FunctionArgs {
@@ -23,17 +22,17 @@ interface IClient {
 }
 ```
 
-### 2. LogRollupコントラクト
-このコントラクトは、Chainlink Functionsとの統合を担当し、オフチェーン処理の結果を検証します。
+### 2. LogRollup Contract
+This contract is responsible for integration with Chainlink Functions and verifies the results of off-chain processing.
 ```solidity
 contract LogRollup is FunctionsClient, ConfirmedOwner {
-    // ... (省略)
+    // ... (omitted)
     function exec(
         bytes memory encryptedSecretsUrls,
         address _client,
         bytes memory params
     ) external returns(bytes32) {
-        // ... (実装詳細)
+        // ... (implementation details)
     }
     function fulfillRequest(
         bytes32 requestId,
@@ -48,16 +47,16 @@ contract LogRollup is FunctionsClient, ConfirmedOwner {
 }
 ```
 
-### 3. クライアントコントラクト（例：LErc721）
-IClientを実装し、特定のユースケース（この場合はNFT）に対応するコントラクトです。
+### 3. Client Contract (Example: LErc721)
+This contract implements IClient and corresponds to a specific use case (in this case, NFT).
 ```solidity
 contract LErc721 is ERC721URIStorage, Ownable, IClient {
-    // ... (省略)
+    // ... (omitted)
     function requestMint(address to, string memory tokenURI) public {
         emit MintRequested(to, tokenURI);
     }
     function applyVerifiedState(MintRequest[] memory verifiedRequests) external onlyRollupOperator {
-        // ... (実装詳細)
+        // ... (implementation details)
     }
     function proof(bool isValid, address sender) external override returns(bool) {
         require(msg.sender == rollupAddress, "Only rollup can call proof");
@@ -67,11 +66,11 @@ contract LErc721 is ERC721URIStorage, Ownable, IClient {
 }
 ```
 
-## 実装フロー
-1. **イベント発行**: クライアントコントラクトで状態変更を表すイベントを発行します。
-   例：`emit MintRequested(to, tokenURI);`
-2. **オフチェーン処理**: 発行されたイベントを収集し、処理します。結果のハッシュを計算します。
-3. **ステートハッシュのコミット**: 計算されたハッシュを`commit`関数を通じてオンチェーンに記録します。
+## Implementation Flow
+1. **Event Emission**: The client contract emits an event representing a state change.
+   Example: `emit MintRequested(to, tokenURI);`
+2. **Off-chain Processing**: Collect and process the emitted events. Calculate the hash of the results.
+3. **State Hash Commitment**: Record the calculated hash on-chain through the `commit` function.
    ```solidity
    function commit(bytes32 _stateHash, address sender) external override returns(bool) {
        require(msg.sender == owner(), 'only owner');
@@ -80,8 +79,8 @@ contract LErc721 is ERC721URIStorage, Ownable, IClient {
        return true;
    }
    ```
-4. **Chainlink Functions実行**: `LogRollup`コントラクトの`exec`関数を呼び出し、Chainlink Functionsを使用してオフチェーン処理の結果を検証します。
-5. **検証（Proof）**: Chainlink Functionsの結果を受け取り、`proof`関数を通じて検証結果を記録します。
+4. **Chainlink Functions Execution**: Call the `exec` function of the `LogRollup` contract, using Chainlink Functions to verify the results of off-chain processing.
+5. **Verification (Proof)**: Receive the results from Chainlink Functions and record the verification results through the `proof` function.
    ```solidity
    function proof(bool isValid, address sender) external override returns(bool) {
        require(msg.sender == rollupAddress, "Only rollup can call proof");
@@ -89,13 +88,12 @@ contract LErc721 is ERC721URIStorage, Ownable, IClient {
        return true;
    }
    ```
-6. **結果の適用**: 検証が成功したら、`applyVerifiedState`関数を通じて状態変更を適用します。
+6. **Result Application**: If verification is successful, apply the state changes through the `applyVerifiedState` function.
    ```solidity
    function applyVerifiedState(MintRequest[] memory verifiedRequests) external onlyRollupOperator {
        require(isStateValid, "State not verified");
        bytes32 calculatedStateHash = keccak256(abi.encode(verifiedRequests));
        require(calculatedStateHash == currentStateHash, "Data mismatch");
-       // ... (状態変更の適用)
+       // ... (apply state changes)
    }
    ```
-
