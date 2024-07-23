@@ -19,7 +19,7 @@ interface IClient {
 }
 
 
-contract EventDrivenErc721 is ERC721URIStorage, Ownable, IClient {
+contract EventErc721 is ERC721URIStorage, Ownable, IClient {
     using Strings for uint256;
     bytes32 internal currentStateHash;
     uint256 public lastProcessedBlock;
@@ -55,10 +55,12 @@ contract EventDrivenErc721 is ERC721URIStorage, Ownable, IClient {
         emit MintRequested(to, tokenURI);
     }
 
+    //offchain
+    //
     function commit(bytes32 _stateHash, address sender) external override returns(bool) {
         require(msg.sender == owner(), 'only owner');
         currentStateHash = _stateHash;
-        isStateValid = false; // Reset validation flag
+        isStateValid = false;
         return true;
     }
 
