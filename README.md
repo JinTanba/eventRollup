@@ -1,4 +1,4 @@
-#⛓️ LayerN + 1 || Event&Oracle rollup
+# ⛓️ LayerN + 1 || Event&Oracle rollup ⛓️
 1. Event-based state changes
 2. Off-chain processing and on-chain verification
 3. Ensuring reliability using Chainlink Functions
