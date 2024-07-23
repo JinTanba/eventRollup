@@ -23,7 +23,7 @@ contract EventErc721 is ERC721URIStorage, Ownable, IClient {
     using Strings for uint256;
     bytes32 internal currentStateHash;
     uint256 public lastProcessedBlock;
-    address public rollupOperator;
+    address public rollupContract;
     bool public isStateValid;
     uint256 public nextTokenId;
 
@@ -36,18 +36,18 @@ contract EventErc721 is ERC721URIStorage, Ownable, IClient {
     event TokenMinted(address indexed to, uint256 indexed tokenId, string uri);
 
     constructor(string memory name, string memory symbol, address rollup) ERC721(name, symbol) Ownable(msg.sender) {
-        rollupOperator = rollup;
+        rollupContract = rollup;
         lastProcessedBlock = block.number;
         nextTokenId = 1; // Start token IDs from 1
     }
 
-    modifier onlyRollupOperator() {
-        require(msg.sender == rollupOperator, "Caller is not the rollup operator");
+    modifier onlyrollupContract() {
+        require(msg.sender == rollupContract, "Caller is not the rollup operator");
         _;
     }
 
-    function setRollupOperator(address newOperator) external onlyOwner {
-        rollupOperator = newOperator;
+    function setrollupContract(address newOperator) external onlyOwner {
+        rollupContract = newOperator;
     }
 
     function requestMint(address to, string memory tokenURI) public {
@@ -56,7 +56,6 @@ contract EventErc721 is ERC721URIStorage, Ownable, IClient {
     }
 
     //offchain
-    //
     function commit(bytes32 _stateHash, address sender) external override returns(bool) {
         require(msg.sender == owner(), 'only owner');
         currentStateHash = _stateHash;
@@ -64,12 +63,14 @@ contract EventErc721 is ERC721URIStorage, Ownable, IClient {
         return true;
     }
 
+    //onchain
     function proof(bool isValid, address sender) external override returns(bool) {
+        require(msg.sender == rollupContract, 'only rollup operator');
         isStateValid = isValid;
         return sender == address(0);
     }
 
-    function applyVerifiedState(MintRequest[] memory verifiedRequests) external onlyRollupOperator {
+    function applyVerifiedState(MintRequest[] memory verifiedRequests) external onlyrollupContract {
             require(isStateValid, "State not verified");
 
             bytes32 calculatedStateHash = keccak256(abi.encode(verifiedRequests));
