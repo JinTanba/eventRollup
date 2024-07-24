@@ -220,8 +220,9 @@ contract LogRollup is FunctionsClient, ConfirmedOwner {
         bytes memory err
     ) internal override {
         Schema.Promise memory _promise = Storage._stack(requestId);
-        (bool isValid, uint256 toBlocknumber) = abi.decode(response, (bool, uint256));
-        IClient(_promise.clientAddress).proof(isValid, _promise.miner, toBlocknumber);
+        (uint256 isValidAsBlockNUmber) = abi.decode(response, (uint256));
+        bool isValid = isValidAsBlockNUmber > 0 ? true : false;
+        IClient(_promise.clientAddress).proof(isValid, _promise.miner, isValidAsBlockNUmber);
         emit Response(requestId, response, err);
     }
 
