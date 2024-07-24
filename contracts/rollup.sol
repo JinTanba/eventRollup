@@ -211,7 +211,7 @@ contract LogRollup is FunctionsClient, ConfirmedOwner {
         Schema.Promise memory _promise = Storage._stack(requestId);
         (uint256 isValidAsBlockNumber) = abi.decode(response, (uint256));
         bool isValid = isValidAsBlockNumber > 0 ? true : false;
-        IClient(_promise.clientAddress).proof(isValid, _promise.miner, isValidAsBlockNUmber);
+        IClient(_promise.clientAddress).proof(isValid, _promise.miner, isValidAsBlockNumber);
         emit Response(requestId, response, err);
     }
 
