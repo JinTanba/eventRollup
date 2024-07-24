@@ -1,3 +1,38 @@
+In EVM, emitted logs are stored as part of the transaction receipt in the receipt tree (Patricia Merkle Trie). The root hash of this receipt tree is included in the block header, thereby perpetuating the logs as immutable data on the blockchain.
+
+Since log operations are overwhelmingly cheaper compared to storage operations, we might consider the following approach:
+`Output logs on-chain, analyze these logs off-chain to generate state, and return it on-chain. Generate state by rolling up logs.`
+
+This allows for the construction of Dapps that can execute each transaction cheaply and quickly. For example, if migrating an existing game on-chain requires storage operations for all actions, it might be economically unfeasible. However, using this idea could potentially make it viable.
+
+However, this idea has a significant problem. To understand this, let's consider an example of a limited NFT collection of 10:
+
+```solidity
+uint256 public MAX_MINT=10;
+function mintOrder() external {
+  require(checkPermisson(msg.sender), "permission error");
+emit Mint(msg.sender, tokenid);
+}
+function _mintbatch(address[] calldata recipients) external onlyOwner {
+    uint256 mintCount = recipients.length > MAX_MINT ? MAX_MINT : recipients.length;
+    
+    for (uint i = 0; i < mintCount; i++) {
+        _safeMint(recipients[i], nextTokenId);
+        
+        emit MintExecuted(recipients[i], nextTokenId);
+        nextTokenId++;
+    }
+}
+```
+
+mintOrder requests a state change, and the request is executed by the administrator. The NFTs are limited to 10. This means only the first 10 people who execute mintOrder can actually mint an NFT. The administrator analyzes the events off-chain and executes _mintbatch with the results, but the problem lies here. There's no way to prove that the administrator has accurately analyzed the events. This introduces a single point of failure into the entire system.
+
+How can we prevent the administrator from unfairly changing the order during the off-chain analysis process? How can we ensure the same level of security as non-log-based execution while executing mints cheaply through log output?
+
+The idea I want to propose here answers these questions.
+
+
+
 # ⛓️ LayerN + 1 || Event&Oracle rollup ⛓️
 1. Event-based state changes
 2. Off-chain processing and on-chain verification
