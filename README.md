@@ -1,3 +1,5 @@
+# ✋suggestion
+
 In EVM, emitted logs are stored as part of the transaction receipt in the receipt tree (Patricia Merkle Trie). The root hash of this receipt tree is included in the block header, thereby perpetuating the logs as immutable data on the blockchain.
 
 Since log operations are overwhelmingly cheaper compared to storage operations, we might consider the following approach:
