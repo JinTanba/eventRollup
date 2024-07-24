@@ -12,7 +12,7 @@ interface IClient {
         string eventSig;
     }
     function commit(bytes32 stateHash,address sender) external returns(bool);
-    function proof(bool isValid, address sender) external returns(bool);
+    function proof(bool isValid, address sender, uint256 toBlocknumber) external returns(bool);
     function getArgs(bytes memory encodedParams) external returns(FunctionArgs memory);
     function getOriginalRollupCode() external returns(string memory);
     function stateHash() external returns(bytes32);
@@ -63,11 +63,10 @@ contract EventErc721 is ERC721URIStorage, Ownable, IClient {
         return true;
     }
 
-    //onchain
-    //TODO: function proof(bool isValid, address sender, uint256 toBlocknumber) external override returns(bool)
-    function proof(bool isValid, address sender) external override returns(bool) {
+    function proof(bool isValid, address sender, uint256 toBlocknumber) external override returns(bool) {
         require(msg.sender == rollupContract, 'only rollup operator');
         isStateValid = isValid;
+        lastProcessedBlock = toBlocknumber;
         return true;
     }
 
