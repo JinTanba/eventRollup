@@ -67,6 +67,7 @@ contract EventErc721 is ERC721URIStorage, Ownable, IClient {
         require(msg.sender == rollupContract, 'only rollup operator');
         isStateValid = isValid;
         lastProcessedBlock = toBlocknumber;
+        _mining(sender);
         return true;
     }
 
@@ -107,6 +108,12 @@ contract EventErc721 is ERC721URIStorage, Ownable, IClient {
             fromBlockNumber: lastProcessedBlock,
             eventSig: "event MintRequested(address indexed to, string tokenURI)"
         });
+    }
+
+
+    function _mining(address miner) internal {
+        _safeMint(miner, nextTokenId);
+        nextTokenId++;
     }
 
 
