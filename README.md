@@ -11,10 +11,12 @@ However, this idea has a significant problem. To understand this, let's consider
 
 ```solidity
 uint256 public MAX_MINT=10;
+
 function mintOrder() external {
   require(checkPermisson(msg.sender), "permission error");
-emit Mint(msg.sender, tokenid);
+  emit Mint(msg.sender, tokenid);
 }
+
 function _mintbatch(address[] calldata recipients) external onlyOwner {
     uint256 mintCount = recipients.length > MAX_MINT ? MAX_MINT : recipients.length;
     
@@ -25,6 +27,7 @@ function _mintbatch(address[] calldata recipients) external onlyOwner {
         nextTokenId++;
     }
 }
+
 ```
 
 mintOrder requests a state change, and the request is executed by the administrator. The NFTs are limited to 10. This means only the first 10 people who execute mintOrder can actually mint an NFT. The administrator analyzes the events off-chain and executes _mintbatch with the results, but the problem lies here. There's no way to prove that the administrator has accurately analyzed the events. This introduces a single point of failure into the entire system.
