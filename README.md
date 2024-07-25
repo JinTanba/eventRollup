@@ -51,8 +51,8 @@ interface IClient {
         uint256 fromBlockNumber;
         string eventSig;
     }
-    function commit(bytes32 stateHash, address sender) external returns(bool);
-    function proof(bool isValid, address sender) external returns(bool);
+    function commit(bytes32 stateHash,address sender) external returns(bool);
+    function proof(bool isValid, address sender, uint256 toBlocknumber) external returns(bool);
     function getArgs(bytes memory encodedParams) external returns(FunctionArgs memory);
     function getOriginalRollupCode() external returns(string memory);
     function stateHash() external returns(bytes32);
@@ -119,11 +119,17 @@ contract LErc721 is ERC721URIStorage, Ownable, IClient {
 4. **Chainlink Functions Execution**: Call the `exec` function of the `LogRollup` contract, using Chainlink Functions to verify the results of off-chain processing.
 5. **Verification (Proof)**: Receive the results from Chainlink Functions and record the verification results through the `proof` function.
    ```solidity
-   function proof(bool isValid, address sender) external override returns(bool) {
-       require(msg.sender == rollupAddress, "Only rollup can call proof");
-       isStateValid = isValid;
-       return true;
-   }
+    function fulfillRequest(
+        bytes32 requestId,
+        bytes memory response,
+        bytes memory err
+    ) internal override {
+        Schema.Promise memory _promise = Storage._stack(requestId);
+        (uint256 isValidAsBlockNumber) = abi.decode(response, (uint256));
+        bool isValid = isValidAsBlockNumber > 0 ? true : false;
+        IClient(_promise.clientAddress).proof(isValid, _promise.miner, isValidAsBlockNumber);
+        emit Response(requestId, response, err);
+    }
    ```
 6. **Result Application**: If verification is successful, apply the state changes through the `applyVerifiedState` function.
    ```solidity
