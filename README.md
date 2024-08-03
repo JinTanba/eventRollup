@@ -38,7 +38,7 @@ The idea I want to propose here answers these questions.
 
 
 
-# ⛓️ LayerN + 1 || Event&Oracle rollup ⛓️
+#  Eventrollup 
 1. Event-based state changes
 2. Off-chain processing and on-chain verification
 3. Ensuring reliability using Chainlink
