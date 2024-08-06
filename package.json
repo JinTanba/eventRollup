@@ -5,6 +5,7 @@
     "hardhat": "^2.22.6"
   },
   "dependencies": {
-    "@chainlink/contracts": "^1.1.1"
+    "@chainlink/contracts": "^1.1.1",
+    "ethers": "^5.7.0"
   }
 }
