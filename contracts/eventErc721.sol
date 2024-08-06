@@ -44,7 +44,7 @@ contract EventDrivenErc721 is ERC721URIStorage, Ownable, IClient {
         emit MintRequested(to, tokenURI);
     }
 
-    function proof(bytes32 stateHash, bytes32 requestId) external returns(bool) {
+    function proofCallback(bytes32 stateHash, bytes32 requestId) external returns(bool) {
         require(msg.sender == rollupOperator, "wrong sender");
         require(lastRequestId == requestId, "wrong request");
         currentStateHash = stateHash;

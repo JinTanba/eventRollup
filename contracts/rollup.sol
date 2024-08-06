@@ -29,7 +29,7 @@ interface IERC677 {
 //    - Core methods: commit(), proof(), getArgs(), getOriginalRollupCode(), stateHash()
 //    - Interface: ```solidity
 interface IClient {
-    function proof(bytes32 stateHash, bytes32 requestId) external returns(bool);
+    function proofCallback(bytes32 stateHash, bytes32 requestId) external returns(bool);
 }
 //  ```
 //
@@ -203,7 +203,7 @@ contract LogRollup is FunctionsClient, ConfirmedOwner {
         Schema.Promise memory _promise = Storage._stack(requestId);
         uint256 newBalance = getSubscriptionBalanceOfLink();
         (bytes32 stateHash) = abi.decode(response, (bytes32));
-        IClient(_promise.clientAddress).proof(stateHash, requestId);
+        IClient(_promise.clientAddress).proofCallback(stateHash, requestId);
         refund(_promise.oldBalance - newBalance, _promise.miner);
         emit Response(requestId, response, err);
     }
