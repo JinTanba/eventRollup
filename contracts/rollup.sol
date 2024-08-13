@@ -233,7 +233,7 @@ contract LogRollup is FunctionsClient, ConfirmedOwner {
         if(depositBalance > amount) {// refund
             IERC20(link).transfer(sender, depositBalance - amount);
         }
-        Storage.linkDeposit()[sender] -= amount;
+        Storage.linkDeposit()[sender] = 0;
     }
 
     function depositLink(address to, uint256 sendAmount) public {
