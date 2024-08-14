@@ -1,4 +1,4 @@
-# ✋suggestion
+# Ethereum New layer?
 
 In EVM, emitted logs are stored as part of the transaction receipt in the receipt tree (Patricia Merkle Trie). The root hash of this receipt tree is included in the block header, thereby perpetuating the logs as immutable data on the blockchain.
 
@@ -11,7 +11,7 @@ However, until recently, this was one of those ideas whose feasibility was consi
 
 I was sincerely hoping that there was some way to move the process of parsing the logs on-chain, or that there was a way to expose that process, and lo and behold, I found a great method.
 
-## Chainlink had that!!!!
+### 😭Chainlink had that!!!!
 
 #  Eventrollup 
 1. Event-based state changes
