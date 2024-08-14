@@ -76,6 +76,7 @@ contract LogRollup is FunctionsClient, ConfirmedOwner {
     error UnexpectedRequestID(bytes32 requestId);
     event Response(bytes32 indexed requestId, bytes response,bytes err);
     event SetSubscription(uint256 subscriptionId, address sender);
+    event Refunded(address indexed sender, uint256 amount, uint256 remainingBalance);
 
     string public rollupcode = 
     "const ethers = await import(\"npm:ethers@6.10.0\");"
@@ -228,13 +229,25 @@ contract LogRollup is FunctionsClient, ConfirmedOwner {
     }
 
     function refund(uint256 amount, address sender) internal {
-        IERC677(link).transferAndCall(router, amount, abi.encode(subscriptionId));
         uint256 depositBalance = Storage.linkDeposit()[sender];
-        if(depositBalance > amount) {// refund
-            IERC20(link).transfer(sender, depositBalance - amount);
-        }
+        require(depositBalance >= amount, "Insufficient deposit balance");
+        
+        uint256 refundAmount = depositBalance - amount;
+    
         Storage.linkDeposit()[sender] = 0;
+        
+        bool success = IERC677(link).transferAndCall(router, amount, abi.encode(subscriptionId));
+        require(success, "Transfer to router failed");
+        
+        if (refundAmount > 0) {
+            success = IERC20(link).transfer(sender, refundAmount);
+            require(success, "Refund transfer failed");
+        }
+        
+        emit Refunded(sender, amount, refundAmount);
     }
+
+
 
     function depositLink(address to, uint256 sendAmount) public {
         Storage.linkDeposit()[to] += sendAmount;
