@@ -12,7 +12,7 @@ However, until recently, this was one of those ideas whose feasibility was consi
 I was sincerely hoping that there was some way to move the process of parsing the logs on-chain, or that there was a way to expose that process, and lo and behold, I found a great method.
 
 ### 😭Chainlink had that!!!!
-
+###### I've always thought that chainlink was great, but I guess it's true.😘
 #  Eventrollup 
 1. Event-based state changes
 2. Off-chain processing and on-chain verification
