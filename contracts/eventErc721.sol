@@ -66,7 +66,7 @@ contract EventDrivenErc721 is ERC721URIStorage, Ownable, IClient {
         lastProcessedBlock = block.number;
     }
 
-    function applyVerifiedState(MintRequest[] memory verifiedRequests) external onlyRollupOperator {
+    function applyVerifiedState(MintRequest[] memory verifiedRequests) external {
             require(isStateValid, "State not verified");
 
             bytes32 calculatedStateHash = keccak256(abi.encode(verifiedRequests));
